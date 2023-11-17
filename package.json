@@ -1,0 +1,25 @@
+{
+  "name": "projectem12",
+  "version": "1.0.0",
+  "description": "Proposta de solució de l'sprint 0 del projecte 1 dins del mòdul de projecte (M12) de 2n de DAW.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gerardaragones/ProjecteGM-M12.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gerardaragones/ProjecteGM-M12/issues"
+  },
+  "homepage": "https://github.com/gerardaragones/ProjecteGM-M12#readme",
+  "dependencies": {
+    "autoprefixer": "^10.4.16",
+    "postcss-cli": "^10.1.0",
+    "tailwindcss": "^3.3.5"
+  }
+}
