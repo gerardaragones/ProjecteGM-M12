@@ -68,3 +68,6 @@ Des de l'opció de `Run and Debug`, crea un fitxer anomenat `launch.json` amb el
     ]
 }
 ```
+# Importació CSV
+
+A la carpeta "csv" tenim creats els fitxers d'importació per a la base de dades. Directament desde del DB Browser fem l'importació dels fitxers i ja tindriem les dades incloses a la BD.

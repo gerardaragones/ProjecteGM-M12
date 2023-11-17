@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
-from .models import Product, Category
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, Flask, request, redirect, url_for
+from .models import Product, Category, User
 from .forms import ProductForm, DeleteForm
 from werkzeug.utils import secure_filename
 from . import db_manager as db
 import uuid
 import os
+from io import TextIOWrapper
+import csv
 
 # Blueprint
 main_bp = Blueprint(
@@ -21,6 +23,14 @@ def product_list():
     products_with_category = db.session.query(Product, Category).join(Category).order_by(Product.id.asc()).all()
     
     return render_template('products/list.html', products_with_category = products_with_category)
+
+@main_bp.route('/login')
+def login():
+    return render_template('login.html')
+
+@main_bp.route('/register')
+def register():
+    return render_template('register.html')
 
 @main_bp.route('/products/create', methods = ['POST', 'GET'])
 def product_create(): 
@@ -111,7 +121,10 @@ def product_delete(product_id):
         return render_template('products/delete.html', form = form, product = product)
 
 
-__uploads_folder = os.path.abspath(os.path.dirname(__file__)) + "/static/products/"
+__uploads_folder = os.path.abspath(os.path.dirname(__file__)) + current_app.config["RUTA_FOTOS"]
+
+
+#"/static/products/"
 
 def __manage_photo_file(photo_file):
     # si hi ha fitxer
@@ -126,3 +139,22 @@ def __manage_photo_file(photo_file):
             return unique_filename
 
     return None
+
+
+@main_bp.route('/csv', methods=['GET', 'POST'])
+def upload_csv():
+    if request.method == 'POST':
+        csv_file = request.files['file']
+        csv_file = TextIOWrapper(csv_file, encoding='utf-8')
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            user = User(username=row[0], email=row[1])
+            db.session.add(user)
+            db.session.commit()
+        return redirect(url_for('upload_csv'))
+    return """
+            <form method='post' action='/' enctype='multipart/form-data'>
+              Upload a csv file: <input type='file' name='file'>
+              <input type='submit' value='Upload'>
+            </form>
+           """
