@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, DecimalField, SubmitField, SelectField, FileField
+from wtforms import PasswordField, StringField, DecimalField, SubmitField, SelectField, FileField, IntegerField
 from wtforms.validators import DataRequired, NumberRange, InputRequired, Email
 import decimal
 
 class RegisterForm(FlaskForm):
     name = StringField(
-        validators = [DataRequired()]
+        validators = [DataRequired()]   
     )
     email = StringField(
         validators = [Email(), DataRequired()]
@@ -35,4 +35,25 @@ class ProductForm(FlaskForm):
 
 # Formulari generic per esborrar i aprofitar la CSRF Protection
 class DeleteForm(FlaskForm):
+    submit = SubmitField()
+
+class LoginForm(FlaskForm):
+    email = StringField(
+        validators = [Email(), DataRequired()]
+    )
+    password = PasswordField(
+        validators=[ DataRequired()]
+    )
+    submit = SubmitField()
+
+class ItemForm(FlaskForm):
+    nom = StringField(
+        validators = [DataRequired()]
+    )
+    unitats = IntegerField(
+        validators = [DataRequired(), NumberRange(min=1)]
+    )
+    store_id = SelectField(
+        validators = [InputRequired()]
+    )
     submit = SubmitField()

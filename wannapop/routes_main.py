@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app, Flask, request, redirect, url_for
+from flask_login import current_user, login_user, login_required, logout_user
 from .models import Product, Category, User
 from .forms import ProductForm, DeleteForm
 from werkzeug.utils import secure_filename
@@ -7,6 +8,8 @@ import uuid
 import os
 from io import TextIOWrapper
 import csv
+from werkzeug.security import generate_password_hash
+
 
 # Blueprint
 main_bp = Blueprint(
@@ -15,7 +18,10 @@ main_bp = Blueprint(
 
 @main_bp.route('/')
 def init():
-    return redirect(url_for('main_bp.product_list'))
+    if current_user.is_authenticated:
+        return redirect(url_for('main_bp.product_list'))
+    else:
+        return redirect(url_for("auth_bp.login"))
 
 @main_bp.route('/products/list')
 def product_list():
@@ -24,13 +30,29 @@ def product_list():
     
     return render_template('products/list.html', products_with_category = products_with_category)
 
-@main_bp.route('/login')
-def login():
-    return render_template('login.html')
-
-@main_bp.route('/register')
+@main_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('main_bp.init'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        password = request.form.get('password')
+
+        existing_user = User.query.filter_by(name=name).first()
+        if existing_user:
+            flash('Este usuario ya existe. Prueba con otro nombre de usuario.', 'error')
+            return redirect(url_for('main_bp.register'))
+
+        new_user = User(name=name, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Registro exitoso. Inicia sesión ahora.', 'success')
+        return redirect(url_for('auth_bp.login'))
+
+    return render_template('register.html', error_message=None)
+
 
 @main_bp.route('/products/create', methods = ['POST', 'GET'])
 def product_create(): 
@@ -148,7 +170,7 @@ def upload_csv():
         csv_file = TextIOWrapper(csv_file, encoding='utf-8')
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
-            user = User(username=row[0], email=row[1])
+            user = User(name=row[0], email=row[1])
             db.session.add(user)
             db.session.commit()
         return redirect(url_for('upload_csv'))

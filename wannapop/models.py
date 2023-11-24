@@ -1,5 +1,7 @@
 from . import db_manager as db
 from sqlalchemy.sql import func
+from flask_login import UserMixin
+
 
 class Product(db.Model):
     __tablename__ = "products"
@@ -14,16 +16,20 @@ class Product(db.Model):
     updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
 
 class Category(db.Model):
-    __tablename__ = "categories"
+    __tablename__ = "categories"    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     slug = db.Column(db.String, nullable=False)
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
-    slug = db.Column(db.String(120), unique=True)
-
-    def __repr__(self):
-        return "<User: {}>".format(self.username)
+    email =db. Column(db.String, unique=True)
+    password = db.Column(db.String)
+    role = db.Column(db.String, nullable=False)
+    created = db.Column(db.DateTime, server_default=func.now())
+    updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    def get_id(self):
+        return self.name
