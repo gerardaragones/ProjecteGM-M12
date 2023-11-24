@@ -44,7 +44,7 @@ def register():
             flash('Este usuario ya existe. Prueba con otro nombre de usuario.', 'error')
             return redirect(url_for('main_bp.register'))
         hashed_password = generate_password_hash(password, method='sha256')
-        new_user = User(name=name, password=password)
+        new_user = User(name=name, password=hashed_password, role='wanner')
         db.session.add(new_user)
         db.session.commit()
 
