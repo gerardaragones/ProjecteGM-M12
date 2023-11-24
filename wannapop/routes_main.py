@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app, Flask, request, redirect, url_for
 from flask_login import current_user, login_user, login_required, logout_user
 from .models import Product, Category, User
-from .forms import ProductForm, DeleteForm
+from .forms import ProductForm, DeleteForm, RegisterForm
 from werkzeug.utils import secure_filename
 from . import db_manager as db
 import uuid
@@ -43,7 +43,7 @@ def register():
         if existing_user:
             flash('Este usuario ya existe. Prueba con otro nombre de usuario.', 'error')
             return redirect(url_for('main_bp.register'))
-
+        hashed_password = generate_password_hash(password, method='sha256')
         new_user = User(name=name, password=password)
         db.session.add(new_user)
         db.session.commit()
