@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template, flash
+from flask import Blueprint, redirect, url_for, render_template, flash, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 from . import db_manager as db, login_manager, mail_manager
 from .forms import LoginForm, RegisterForm, ResendForm
@@ -13,6 +13,7 @@ auth_bp = Blueprint("auth_bp", __name__)
 def login():
     # Si ja està autenticat, sortim d'aquí
     if current_user.is_authenticated:
+        current_app.logger.debug('Lusuari está autenticat correctament' + current_user.name)
         return redirect(url_for("main_bp.init"))
 
     form = LoginForm()
