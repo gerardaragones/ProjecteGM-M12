@@ -13,7 +13,6 @@ auth_bp = Blueprint("auth_bp", __name__)
 def login():
     # Si ja està autenticat, sortim d'aquí
     if current_user.is_authenticated:
-        current_app.logger.debug('Lusuari está autenticat correctament' + current_user.name)
         return redirect(url_for("main_bp.init"))
 
     form = LoginForm()
@@ -30,6 +29,7 @@ def login():
             
             # aquí és crea la cookie
             login_user(user)
+            current_app.logger.debug('Lusuari está autenticat correctament' + current_user.name)
             # aquí s'actualitzen els rols que té l'usuari
             notify_identity_changed()
 
