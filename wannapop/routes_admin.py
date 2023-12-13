@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash
 from .models import User
 from .helper_role import Role, role_required
 from . import db_manager as db
@@ -16,3 +16,32 @@ def admin_index():
 def admin_users():
     users = db.session.query(User).all()
     return render_template('admin/users_list.html', users=users)
+
+
+@admin_bp.route('/admin/users/<int:user_id>/block', methods=['POST', 'GET'])
+@role_required(Role.admin)
+def block_user(user_id):
+    user = db.session.query(User).get(user_id)
+
+    if user:
+        user.is_blocked = True
+        db.session.commit()
+        flash(f'Usuario {user.name} bloqueado correctamente.', 'success')
+    else:
+        flash('Usuario no encontrado.', 'error')
+
+    return redirect(url_for('admin_bp.admin_users'))
+
+@admin_bp.route('/admin/users/<int:user_id>/unblock', methods=['POST', 'GET'])
+@role_required(Role.admin)
+def unblock_user(user_id):
+    user = db.session.query(User).get(user_id)
+
+    if user:
+        user.is_blocked = False
+        db.session.commit()
+        flash(f'Usuario {user.name} desbloqueado correctamente.', 'success')
+    else:
+        flash('Usuario no encontrado.', 'error')
+
+    return redirect(url_for('admin_bp.admin_users'))
