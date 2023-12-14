@@ -2,25 +2,32 @@
 {% from "partials/_formhelpers.html" import render_errors %}
 
 {% block title %}
-Profile
+    Profile
 {% endblock %}
 
 {% block content %}
 <form action="/profile" method="POST">
     {{ form.csrf_token }}
+
+    {% if user_is_blocked %}
+        <div class="alert alert-warning mt-3">
+            <strong>¡Atención!</strong> Tu cuenta está bloqueada. Puedes actualizar tu perfil, pero ten en cuenta el motivo del bloqueo: {{ blocked_reason }}
+        </div>
+    {% endif %}
+
     <div class="form-floating mb-3">
-       {{ form.name(class_="form-control", placeholder_="Nom d'usuari/a") }}
-       {{ form.name.label }}
+        {{ form.name(class_="form-control", placeholder_="Nom d'usuari/a") }}
+        {{ form.name.label }}
     </div>
     <div class="form-floating mb-3">
-       {{ form.email(class_="form-control", placeholder_="Correu electrònic") }}
-       {{ form.email.label }}
+        {{ form.email(class_="form-control", placeholder_="Correu electrònic") }}
+        {{ form.email.label }}
     </div>
     <div class="form-floating mb-3">
-       {{ form.password(class_="form-control", placeholder_="La mateixa contrasenya") }}
-       {{ form.password.label }}
+        {{ form.password(class_="form-control", placeholder_="La mateixa contrasenya") }}
+        {{ form.password.label }}
     </div>
-    {{ form.submit(value="ACTUALITZA",class_="btn btn-primary btn-xl") }}
+    {{ form.submit(value="ACTUALITZA", class_="btn btn-primary btn-xl") }}
     {{ render_errors(form) }}
- </form>
+</form>
 {% endblock %}

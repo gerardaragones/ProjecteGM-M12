@@ -1,0 +1,25 @@
+<!-- templates/admin/blocked_user.html -->
+
+{% extends 'layouts/_base.html' %}
+
+{% block title %}
+    Bloquear Usuario
+{% endblock %}
+
+{% block content %}
+    <h2>Bloquear Usuario</h2>
+    <p>Nombre de usuario: {{ user.name }}</p>
+    
+    <form method="post" action="{{ url_for('admin_bp.block_user', user_id=user.id) }}">
+        {{ form.csrf_token }}
+        
+        <div class="form-group">
+            <label for="message">Mensaje de bloqueo:</label>
+            {{ form.message(class="form-control", id="message", placeholder="Ingrese el mensaje de bloqueo") }}
+        </div>
+
+        <button type="submit" class="btn btn-dark btn-xl">Bloquear Usuario</button>
+    </form>
+    
+    <a class="btn btn-dark btn-xl" href="{{ url_for('admin_bp.admin_users') }}">&#x3c;&#x3c; Volver a la lista de usuarios</a>
+{% endblock %}

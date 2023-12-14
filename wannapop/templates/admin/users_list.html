@@ -1,42 +1,37 @@
 {% extends 'layouts/_base.html' %}
 
 {% block title %}
-Usuaris
+    Usuaris
 {% endblock %}
 
 {% block content %}
-<table class="table table-bordered table-striped" style="background-color: #fefefe;">
-	<thead>
-		<tr>
-			<th>ID</th>
-			<th>NOM</th>
-			<th>EMAIL</th>
-			<th>ROL</th>
-			<th>Accions</th>  <!-- Nueva columna para las acciones -->
-		</tr>
-	</thead>
-	<tbody>
-		{% for user in users %}
-		<tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>
-                {% if user.is_blocked %}
-                    <form action="{{ url_for('admin_bp.unblock_user', user_id=user.id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-outline-success btn-sm">Desbloquear</button>
-                    </form>
-                {% else %}
-                    <form action="{{ url_for('admin_bp.block_user', user_id=user.id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Bloquear</button>
-                    </form>
-                {% endif %}
-            </td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
-<a class="btn btn-outline-dark btn-xl" href="/admin">&#x3c;&#x3c; Tornar la pàgina d'administració</a>
-
+    <table class="table table-bordered table-striped" style="background-color: #fefefe;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>NOM</th>
+                <th>EMAIL</th>
+                <th>ROL</th>
+                <th>ACCIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                    {% if user.id in blocked_users %}
+                        <a class="btn btn-danger btn-sm" href="{{ url_for('admin_bp.unblock_user', user_id=user.id) }}">Desbloquejar</a>
+                    {% else %}
+                        <a class="btn btn-dark btn-sm" href="{{ url_for('admin_bp.block_user', user_id=user.id) }}">Bloquejar</a>
+                    {% endif %}
+                </td>            
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-dark btn-sm" href="{{ url_for('admin_bp.admin_index') }}">&#x3c;&#x3c; Tornar la pàgina d'administració</a>
 {% endblock %}

@@ -92,3 +92,9 @@ class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     slug = db.Column(db.String, nullable=False)
+
+class BlockedUser(db.Model):
+    __tablename__ = "blocked_users"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True, nullable=False)
+    message = db.Column(db.String, nullable=False)
+    created = db.Column(db.DateTime, server_default=func.now())
