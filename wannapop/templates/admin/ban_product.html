@@ -1,0 +1,24 @@
+{% extends 'layouts/_base.html' %}
+
+{% block title %}
+Ban Product
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Ban Product</h2>
+    
+    <form method="POST" action="{{ url_for('admin_bp.ban_product', product_id=product.id) }}">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.reason.label(class="form-label") }}
+            {{ form.reason(class="form-control", placeholder="Enter the reason for banning the product") }}
+            {% if form.reason.errors %}
+                <small class="text-danger">{{ form.reason.errors[0] }}</small>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-danger">Ban Product</button>
+    </form>
+</div>
+{% endblock %}

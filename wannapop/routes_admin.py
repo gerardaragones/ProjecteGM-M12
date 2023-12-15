@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from .models import User, BlockedUser
-from .forms import BlockUserForm
+from .models import User, BlockedUser, Product, BannedProduct
+from .forms import BlockUserForm, BanProduct
 from .helper_role import Role, role_required
 from . import db_manager as db
 
@@ -18,7 +18,6 @@ def admin_users():
     users = db.session.query(User).all()
     blocked_users = {blocked_user.user_id for blocked_user in BlockedUser.query.all()}
     return render_template('admin/users_list.html', users=users, blocked_users=blocked_users)
-
 
 @admin_bp.route('/admin/users/<int:user_id>/block', methods=['GET', 'POST'])
 @role_required(Role.admin)
@@ -60,3 +59,45 @@ def unblock_user(user_id):
         flash('User not found.', 'danger')
     
     return redirect(url_for('admin_bp.admin_users'))
+
+@admin_bp.route('/admin/products/<int:product_id>/ban', methods=['GET', 'POST'])
+@role_required(Role.moderator)
+def ban_product(product_id):
+    product_to_ban = Product.query.get(product_id)
+
+
+    product_banned = BannedProduct.query.filter_by(product_id=product_to_ban.id).first()
+
+    if product_to_ban and not product_banned:
+        form = BanProduct()  # Inicializar el formulario
+
+        if request.method == 'POST' and form.validate_on_submit():
+            banned_product = BannedProduct(product_id=product_to_ban.id, reason=form.reason.data)
+            db.session.add(banned_product)
+            db.session.commit()
+            flash(f'El producto {product_to_ban.title} ha sido bloqueado.', 'success')
+            return redirect(url_for('products_bp.product_list'))
+
+        return render_template('admin/ban_product.html', form=form, product=product_to_ban, product_banned=product_banned)
+
+    flash('Producto no encontrado o el producto ya está bloqueado.', 'danger')
+    return redirect(url_for('products_bp.product_list'))
+
+@admin_bp.route('/admin/products/<int:product_id>/unban', methods=['POST'])
+@role_required(Role.moderator)
+def unban_product(product_id):
+    product_to_unban = Product.query.get(product_id)
+
+    if product_to_unban:
+        banned_product = BannedProduct.query.filter_by(product_id=product_to_unban.id).first()
+
+        if banned_product:
+            db.session.delete(banned_product)
+            db.session.commit()
+            flash(f'The product {product_to_unban.title} has been unbanned.', 'success')
+        else:
+            flash(f'The product {product_to_unban.title} is not banned.', 'warning')
+    else:
+        flash('Product not found.', 'danger')
+
+    return redirect(url_for('products_bp.product_list'))

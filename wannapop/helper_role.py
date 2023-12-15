@@ -3,6 +3,7 @@ from flask_login import current_user
 from flask_principal import identity_loaded, identity_changed, ActionNeed, RoleNeed, Permission, Identity, AnonymousIdentity
 from enum import Enum
 
+
 class Role(str, Enum):
     wanner    = "wanner"
     moderator = "moderator"
@@ -14,7 +15,7 @@ class Action(str, Enum):
     products_read     = "view products"
     products_update   = "edit products"
     products_delete   = "delete products"
-    # products_moderate = "moderate products"
+    products_moderate = "moderate products"
     categories_list     = "list categories"
     categories_create   = "create categories"
     categories_read     = "view categories"
@@ -41,8 +42,7 @@ _permissions = {
     Role.moderator: [
         Action.products_list,
         Action.products_read,
-        # Action.products_moderate
-        Action.products_delete # si s'implementa la moderació es treu aquesta línia
+        Action.products_moderate
     ],
     Role.admin: [
         Action.products_list,

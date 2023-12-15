@@ -89,3 +89,7 @@ class DeleteForm(FlaskForm):
 class BlockUserForm(FlaskForm):
     message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Block User')
+
+class BanProduct(FlaskForm):
+    reason = TextAreaField('Reason', validators=[DataRequired()])
+    submit = SubmitField('Ban User')

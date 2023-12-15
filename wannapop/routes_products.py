@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import current_user
 from werkzeug.utils import secure_filename
-from .models import Product, Category, Status, BlockedUser
+from .models import Product, Category, Status, BlockedUser, BannedProduct
 from .forms import ProductForm, DeleteForm
 from .helper_role import Action, perm_required
 from werkzeug.utils import secure_filename
@@ -22,8 +22,11 @@ def templates_processor():
 @products_bp.route('/products/list')
 @perm_required(Action.products_list)
 def product_list():
-    # select amb join que retorna una llista de resultats
-    products_with_category = db.session.query(Product, Category).join(Category).order_by(Product.id.asc()).all()
+    products_with_category = db.session.query(Product, Category, BannedProduct) \
+        .join(Category) \
+        .outerjoin(BannedProduct, Product.id == BannedProduct.product_id) \
+        .order_by(Product.id.asc()) \
+        .all()
     
     return render_template('products/list.html', products_with_category = products_with_category)
 
@@ -70,14 +73,17 @@ def product_create():
 @products_bp.route('/products/read/<int:product_id>')
 @perm_required(Action.products_read)
 def product_read(product_id):
-    # select amb join i 1 resultat
+    # Seleccionar con join y 1 resultado
     result = db.session.query(Product, Category, Status).join(Category).join(Status).filter(Product.id == product_id).one_or_none()
 
     if not result:
         abort(404)
 
     (product, category, status) = result
-    return render_template('products/read.html', product = product, category = category, status = status)
+
+    product_banned = BannedProduct.query.filter_by(product_id=product.id).first()
+
+    return render_template('products/read.html', product=product, category=category, status=status, product_banned=product_banned)
 
 @products_bp.route('/products/update/<int:product_id>',methods = ['POST', 'GET'])
 @perm_required(Action.products_update)
