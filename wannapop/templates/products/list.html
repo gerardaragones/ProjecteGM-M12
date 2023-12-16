@@ -23,7 +23,13 @@ Productes
             <td>{{ product.price }}</td>
             <td>{{ category.name }}</td>
             <td>
-                <a href="/products/read/{{ product.id }}" alt="Visualitzar">👁️</a>
+                {% if banned_product and (current_user.is_admin_or_moderator() or current_user.id == product.seller_id) %}
+                    <a href="/products/read/{{ product.id }}" alt="Visualitzar">👁️</a>
+                {% endif %}
+                {% if not banned_product %}
+                    <a href="/products/read/{{ product.id }}" alt="Visualitzar">👁️</a>
+                {% endif %}
+
             </td>
             <td>
                 {% if current_user.is_action_allowed_to_product(Action.products_update, product) %}
