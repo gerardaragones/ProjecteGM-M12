@@ -69,7 +69,7 @@ def ban_product(product_id):
     product_banned = BannedProduct.query.filter_by(product_id=product_to_ban.id).first()
 
     if product_to_ban and not product_banned:
-        form = BanProduct()  # Inicializar el formulario
+        form = BanProduct()
 
         if request.method == 'POST' and form.validate_on_submit():
             banned_product = BannedProduct(product_id=product_to_ban.id, reason=form.reason.data)

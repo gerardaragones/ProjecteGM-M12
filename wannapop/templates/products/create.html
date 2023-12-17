@@ -8,7 +8,7 @@
 {% block content %}
     {% if user_is_blocked %}
         <div class="alert alert-danger mt-3">
-            <strong>¡Atención!</strong> No puedes crear nuevos productos porque estás bloqueado.
+            <strong>¡Atención!</strong> No puedes crear nuevos productos porque tu cuenta está bloqueada por el siguiente motivo: {{ blocked_reason }}.
         </div>
     {% else %}
         <h3>Introdueix les dades</h3>
