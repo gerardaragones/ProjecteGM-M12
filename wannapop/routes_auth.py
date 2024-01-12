@@ -1,10 +1,11 @@
-from flask import Blueprint, redirect, url_for, render_template, flash, current_app
+from flask import Blueprint, redirect, url_for, render_template, flash
 from flask_login import current_user, login_required, login_user, logout_user
-from . import db_manager as db, login_manager, mail_manager
+from . import db_manager as db, login_manager, mail_manager, logger
 from .forms import LoginForm, RegisterForm, ResendForm
 from .helper_role import notify_identity_changed, Role
 from .models import User
 import secrets
+from markupsafe import Markup
 
 # Blueprint
 auth_bp = Blueprint("auth_bp", __name__)
@@ -20,17 +21,20 @@ def login():
         email = form.email.data
         password = form.password.data
 
+        logger.debug(f"Usuari {email} intenta autenticar-se")
+
         user = load_user(email)
         if user and user.check_password(password):
             # si no està verificat, no pot entrar
             if not user.verified:
+                logger.warning(f"Usuari {email} no s'ha autenticat correctament")
                 flash("Revisa el teu email i verifica el teu compte", "error")
                 return redirect(url_for("auth_bp.login"))
             
+            logger.info(f"Usuari {email} s'ha autenticat correctament")
+
             # aquí és crea la cookie
             login_user(user)
-            current_app.logger.debug('Lusuari está autenticat correctament' + current_user.name)
-            #
             # aquí s'actualitzen els rols que té l'usuari
             notify_identity_changed()
 
@@ -40,7 +44,7 @@ def login():
         flash("Error d'usuari i/o contrasenya", "error")
         return redirect(url_for("auth_bp.login"))
     
-    return render_template('login.html', form = form)
+    return render_template('auth/login.html', form = form)
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -63,16 +67,25 @@ def register():
         new_user.email_token = secrets.token_urlsafe(20)
 
         # insert!
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except:
+            logger.error(f"No s'ha inserit l'usuari/a {new_user.email} a BD")
+            flash("Nom d'usuari/a i/o correu electrònic duplicat", "danger")
+        else:
+            logger.info(f"Usuari {new_user.email} s'ha registrat correctament")
+            # envio l'email!
+            try:
+                mail_manager.send_register_email(new_user.name, new_user.email, new_user.email_token)
+                flash("Revisa el teu correu per verificar-lo", "success")
+            except:
+                logger.warning(f"No s'ha enviat correu de verificació a l'usuari/a {new_user.email}")
+                flash(Markup("No hem pogut enviar el correu de verificació. Prova-ho més tard <a href='/resend'>aquí</a>"), "danger")
 
-        # envio l'email!
-        mail_manager.send_register_email(new_user.name, new_user.email, new_user.email_token)
-
-        flash("Revisa el teu correu per verificar-lo", "success")
-        return redirect(url_for("auth_bp.login"))
+            return redirect(url_for("auth_bp.login"))
     
-    return render_template('register.html', form = form)
+    return render_template('auth/register.html', form = form)
 
 @auth_bp.route("/verify/<name>/<token>")
 def verify(name, token):
@@ -106,7 +119,7 @@ def resend():
             flash("Aquest compte no existeix", "error")
         return redirect(url_for("auth_bp.login"))
     else:
-        return render_template('resend.html', form = form)
+        return render_template('auth/resend.html', form = form)
 
 @auth_bp.route("/logout")
 @login_required

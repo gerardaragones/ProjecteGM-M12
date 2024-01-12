@@ -1,4 +1,3 @@
--- Crear la taula categories
 CREATE TABLE categories (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE,
@@ -11,7 +10,6 @@ CREATE TABLE statuses (
 	slug TEXT UNIQUE
 );
 
--- Crear la taula users
 CREATE TABLE users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL UNIQUE,
@@ -24,7 +22,6 @@ CREATE TABLE users (
 	updated DATETIME NOT NULL DEFAULT (DATETIME('now'))
 );
 
--- Crear la taula products
 CREATE TABLE products (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	title TEXT NOT NULL,
@@ -39,4 +36,18 @@ CREATE TABLE products (
 	FOREIGN KEY (category_id) REFERENCES categories(id),
 	FOREIGN KEY (status_id) REFERENCES statuses(id),
 	FOREIGN KEY (seller_id) REFERENCES users(id)
+);
+
+CREATE TABLE blocked_users (
+	user_id INTEGER PRIMARY KEY,
+	message TEXT NOT NULL,
+	created DATETIME NOT NULL DEFAULT (DATETIME('now')),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE banned_products (
+	product_id INTEGER PRIMARY KEY,
+	reason TEXT NOT NULL,
+	created DATETIME NOT NULL DEFAULT (DATETIME('now')),
+	FOREIGN KEY (product_id) REFERENCES products(id)
 );

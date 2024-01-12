@@ -13,3 +13,8 @@ body {
 tr.own {
     font-weight: bolder;
 }
+
+.blocked,
+.banned {
+    background-color: lightpink;
+}

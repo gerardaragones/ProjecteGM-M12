@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from .models import Status
-from .forms import StatusForm, DeleteForm
+from .forms import StatusForm, ConfirmForm
 from .helper_role import Action, perm_required
 from . import db_manager as db
 
@@ -84,7 +84,7 @@ def status_delete(status_id):
     if not status:
         abort(404)
 
-    form = DeleteForm()
+    form = ConfirmForm()
     if form.validate_on_submit(): # si s'ha fet submit al formulari
         # delete!
         db.session.delete(status)

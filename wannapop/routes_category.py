@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from .models import Category
-from .forms import CategoryForm, DeleteForm
+from .forms import CategoryForm, ConfirmForm
 from .helper_role import Action, perm_required
 from . import db_manager as db
 
@@ -84,7 +84,7 @@ def category_delete(category_id):
     if not category:
         abort(404)
 
-    form = DeleteForm()
+    form = ConfirmForm()
     if form.validate_on_submit(): # si s'ha fet submit al formulari
         # delete!
         db.session.delete(category)

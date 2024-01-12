@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, logout_user
 from .forms import ProfileForm
-from . import db_manager as db, mail_manager
 from .models import BlockedUser
+from . import db_manager as db, mail_manager
+import secrets
 
 # Blueprint
 main_bp = Blueprint("main_bp", __name__)
@@ -18,7 +19,6 @@ def init():
 @login_required
 def profile():
     form = ProfileForm()
-
     if form.validate_on_submit():
         something_change = False
         new_email = form.email.data
@@ -35,43 +35,40 @@ def profile():
             something_change = True
             current_user.name = new_name
 
-        if new_password:  # not empty
+        if new_password: # not empty
             something_change = True
             current_user.password = new_password
 
         if not something_change:
             flash("Cap canvi", "success")
         else:
-            # Guardar los cambios en la base de datos
+            # guardo els canvis a la bbdd
             db.session.commit()
 
             if not current_user.verified:
-                # Enviar el correo electrónico
+                # envio l'email!
                 mail_manager.send_register_email(current_user.name, current_user.email, current_user.email_token)
 
-                # Cerrar sesión
+                # logout
+                logout_user()
                 flash("Revisa el teu correu per verificar-lo", "success")
                 return redirect(url_for("auth_bp.login"))
 
             flash("Perfil actualitzat correctament", "success")
-
+            
         return redirect(url_for('main_bp.profile'))
-
     else:
+        blocked = db.session.query(BlockedUser).filter(BlockedUser.user_id == current_user.id).one_or_none()
+
         form.name.data = current_user.name
-        form.email.data = current_user.email
+        form.email.data = current_user.email    
 
-        # Verificar si el usuario está bloqueado y obtener el motivo del bloqueo
-        blocked_user = BlockedUser.query.filter_by(user_id=current_user.id).first()
-        user_is_blocked = blocked_user is not None
-        blocked_reason = blocked_user.message if user_is_blocked else None
-
-        return render_template('profile.html', form=form, user_is_blocked=user_is_blocked, blocked_reason=blocked_reason)
+        return render_template('profile.html', form = form, blocked = blocked)
 
 @main_bp.app_errorhandler(403)
 def forbidden_access(e):
-    return render_template('403.html', message=e), 403
+  return render_template('403.html',message=e), 403
 
 @main_bp.app_errorhandler(404)
 def not_allowed(e):
-    return render_template('404.html', message=e), 404
+  return render_template('404.html',message=e), 404

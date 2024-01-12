@@ -17,6 +17,8 @@ class MailManager:
         self.external_url = app.config.get('EXTERNAL_URL')
 
     def send_register_email(self, dst_name, dst_addr, token):
+        from . import logger
+        
         subject = "Verifica el teu compte"
         content = f"""
 Hola {dst_name},
@@ -31,6 +33,8 @@ Salutacions,
 
 WannaPop
 """
+        logger.info(f"Enviant email de verificació a {dst_addr}")
+
         # s'envia l'email a l'usuari
         self.__send_mail(dst_name, dst_addr, subject, content)
 
@@ -42,8 +46,6 @@ WannaPop
             server.starttls(context=context)
             server.ehlo()  # Can be omitted
             server.login(self.sender_addr, self.sender_password)
-
-            print("Login done!")
 
             msg = EmailMessage()
             msg['From'] = formataddr((self.sender_name, self.sender_addr))

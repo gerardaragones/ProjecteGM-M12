@@ -2,9 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 from .models import Product, Category, Status, BlockedUser, BannedProduct
-from .forms import ProductForm, DeleteForm
+from .forms import ProductForm, ConfirmForm
 from .helper_role import Action, perm_required
-from werkzeug.utils import secure_filename
 from . import db_manager as db
 import uuid
 import os
@@ -22,20 +21,17 @@ def templates_processor():
 @products_bp.route('/products/list')
 @perm_required(Action.products_list)
 def product_list():
-    products_with_category = db.session.query(Product, Category, BannedProduct) \
-        .join(Category) \
-        .outerjoin(BannedProduct, Product.id == BannedProduct.product_id) \
-        .order_by(Product.id.asc()) \
-        .all()
-    
-    return render_template('products/list.html', products_with_category = products_with_category)
+    # select amb join que retorna una llista de resultats
+    products = db.session.query(Product, Category, BannedProduct).join(Category).outerjoin(BannedProduct).order_by(Product.id.asc()).all()
 
-@products_bp.route('/products/create', methods=['POST', 'GET'])
+    return render_template('products/list.html', products = products)
+
+@products_bp.route('/products/create', methods = ['POST', 'GET'])
 @perm_required(Action.products_create)
-def product_create():
-    # Comprueba si el usuario está bloqueado
-    blocked_user = BlockedUser.query.filter_by(user_id=current_user.id).first()
-    user_is_blocked = blocked_user is not None
+def product_create(): 
+    # usuari bloquejat, no pot crear productes
+    if db.session.query(BlockedUser).filter(BlockedUser.user_id == current_user.id).one_or_none():
+        abort(403)
 
     # selects que retornen una llista de resultats
     categories = db.session.query(Category).order_by(Category.id.asc()).all()
@@ -68,22 +64,26 @@ def product_create():
         flash("Nou producte creat", "success")
         return redirect(url_for('products_bp.product_list'))
     else: # GET
-        return render_template('products/create.html', form=form, user_is_blocked=user_is_blocked)
+        return render_template('products/create.html', form = form)
 
 @products_bp.route('/products/read/<int:product_id>')
 @perm_required(Action.products_read)
 def product_read(product_id):
-    # Seleccionar con join y 1 resultado
-    result = db.session.query(Product, Category, Status).join(Category).join(Status).filter(Product.id == product_id).one_or_none()
+    # select amb join i 1 resultat
+    result = db.session.query(Product, Category, Status, BannedProduct).join(Category).join(Status).outerjoin(BannedProduct).filter(Product.id == product_id).one_or_none()
 
     if not result:
         abort(404)
 
-    (product, category, status) = result
+    (product, category, status, banned) = result
+    
+    if not current_user.is_action_allowed_to_product(Action.products_read, product, banned):
+        abort(403)
+    
+    if banned:
+        flash("Producte prohibit per la següent raó: " + banned.reason, "danger")
 
-    product_banned = BannedProduct.query.filter_by(product_id=product.id).first()
-
-    return render_template('products/read.html', product=product, category=category, status=status, product_banned=product_banned)
+    return render_template('products/read.html', product = product, category = category, status = status)
 
 @products_bp.route('/products/update/<int:product_id>',methods = ['POST', 'GET'])
 @perm_required(Action.products_update)
@@ -137,7 +137,7 @@ def product_delete(product_id):
     if not current_user.is_action_allowed_to_product(Action.products_delete, product):
         abort(403)
 
-    form = DeleteForm()
+    form = ConfirmForm()
     if form.validate_on_submit(): # si s'ha fet submit al formulari
         # delete!
         db.session.delete(product)
