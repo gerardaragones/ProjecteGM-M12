@@ -68,8 +68,7 @@ def register():
 
         # insert!
         try:
-            db.session.add(new_user)
-            db.session.commit()
+            new_user.save()
         except:
             logger.error(f"No s'ha inserit l'usuari/a {new_user.email} a BD")
             flash("Nom d'usuari/a i/o correu electrònic duplicat", "danger")

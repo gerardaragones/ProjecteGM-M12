@@ -43,8 +43,7 @@ def block_user(user_id):
         # carregar dades del formulari
         form.populate_obj(new_block)
         # insert!
-        db.session.add(new_block)
-        db.session.commit()
+        new_block.save()
         # retornar al llistat
         flash("Compte d'usuari/a bloquejat", "success")
         return redirect(url_for('admin_bp.admin_users'))
@@ -70,8 +69,7 @@ def unblock_user(user_id):
     
     form = ConfirmForm()
     if form.validate_on_submit():
-        db.session.delete(blocked)
-        db.session.commit()
+        user.delete(blocked)
         flash("Compte d'usuari/a desbloquejat", "success")
         return redirect(url_for('admin_bp.admin_users'))
     
