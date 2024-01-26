@@ -96,8 +96,9 @@ def ban_product(product_id):
         # carregar dades del formulari
         form.populate_obj(new_banned)
         # insert!
-        db.session.add(new_banned)
-        db.session.commit()
+        # db.session.add(new_banned)
+        # db.session.commit()
+        BannedProduct.save(new_banned)
         # retornar al llistat
         flash("Producte prohibit", "success")
         return redirect(url_for('products_bp.product_list'))
@@ -119,8 +120,9 @@ def unban_product(product_id):
     
     form = ConfirmForm()
     if form.validate_on_submit():
-        db.session.delete(banned)
-        db.session.commit()
+        # db.session.delete(banned)
+        # db.session.commit()
+        BannedProduct.delete(banned)
         flash("Producte permès", "success")
         return redirect(url_for('products_bp.product_list'))
 
