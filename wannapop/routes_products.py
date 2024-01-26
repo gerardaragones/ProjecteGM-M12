@@ -57,8 +57,7 @@ def product_create():
             new_product.photo = "no_image.png"
 
         # insert!
-        db.session.add(new_product)
-        db.session.commit()
+        new_product.save()
 
         # https://en.wikipedia.org/wiki/Post/Redirect/Get
         flash("Nou producte creat", "success")
@@ -116,8 +115,7 @@ def product_update(product_id):
             product.photo = filename
 
         # update!
-        db.session.add(product)
-        db.session.commit()
+        product.save(product)
 
         # https://en.wikipedia.org/wiki/Post/Redirect/Get
         flash("Producte actualitzat", "success")
@@ -140,8 +138,7 @@ def product_delete(product_id):
     form = ConfirmForm()
     if form.validate_on_submit(): # si s'ha fet submit al formulari
         # delete!
-        db.session.delete(product)
-        db.session.commit()
+        product.delete()
 
         flash("Producte esborrat", "success")
         return redirect(url_for('products_bp.product_list'))
