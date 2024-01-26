@@ -43,8 +43,7 @@ def block_user(user_id):
         # carregar dades del formulari
         form.populate_obj(new_block)
         # insert!
-        db.session.add(new_block)
-        db.session.commit()
+        BlockedUser.save(new_block)
         # retornar al llistat
         flash("Compte d'usuari/a bloquejat", "success")
         return redirect(url_for('admin_bp.admin_users'))
@@ -70,8 +69,7 @@ def unblock_user(user_id):
     
     form = ConfirmForm()
     if form.validate_on_submit():
-        db.session.delete(blocked)
-        db.session.commit()
+        BlockedUser.delete(blocked)
         flash("Compte d'usuari/a desbloquejat", "success")
         return redirect(url_for('admin_bp.admin_users'))
     
@@ -98,8 +96,9 @@ def ban_product(product_id):
         # carregar dades del formulari
         form.populate_obj(new_banned)
         # insert!
-        db.session.add(new_banned)
-        db.session.commit()
+        # db.session.add(new_banned)
+        # db.session.commit()
+        BannedProduct.save(new_banned)
         # retornar al llistat
         flash("Producte prohibit", "success")
         return redirect(url_for('products_bp.product_list'))
@@ -121,8 +120,9 @@ def unban_product(product_id):
     
     form = ConfirmForm()
     if form.validate_on_submit():
-        db.session.delete(banned)
-        db.session.commit()
+        # db.session.delete(banned)
+        # db.session.commit()
+        BannedProduct.delete(banned)
         flash("Producte permès", "success")
         return redirect(url_for('products_bp.product_list'))
 

@@ -115,7 +115,7 @@ def product_update(product_id):
             product.photo = filename
 
         # update!
-        product.save(product)
+        product.save()
 
         # https://en.wikipedia.org/wiki/Post/Redirect/Get
         flash("Producte actualitzat", "success")
