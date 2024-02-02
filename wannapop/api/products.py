@@ -14,18 +14,18 @@ def get_products():
         Product.db_enable_debug()
         # Filter using query param
         my_filter = Product.nom.like('%' + search + '%')
-        products_with_store = Product.db_query_with(Category).filter(my_filter)
+        products_with_category = Product.db_query_with(Category).filter(my_filter)
     else:
         # No filter
-        products_with_store = Product.get_all_with(Category)
-    data = Product.to_dict_collection(products_with_store)
+        products_with_category = Product.get_all_with(Category)
+    data = Product.to_dict_collection(products_with_category)
     return json_response(data)
 
 #Create
 @api_bp.route('/products', methods=['POST'])
 def create_product():
     try:
-        data = json_request(['nom', 'store_id', 'unitats'])
+        data = json_request(['nom', 'category_id', 'unitats'])
     except Exception as e:
         current_app.logger.debug(e)
         return bad_request(str(e))
@@ -40,14 +40,14 @@ def create_product():
 def get_product(id):
     result = Product.get_with(id, Category, BannedProduct)
     if result:
-        (product, store, discount) = result
+        (product, category, BannedProduct) = result
         # Serialize data
         data = product.to_dict()
         # Add relationships
-        data["store"] = store.to_dict()
-        del data["store_id"]
-        if (discount):
-            data["discount"] = discount.discount
+        data["category"] = category.to_dict()
+        del data["category_id"]
+        if (BannedProduct):
+            data["BannedProduct"] = BannedProduct.BannedProduct
         return json_response(data)
     else:
         current_app.logger.debug("Product {} not found".format(id))
@@ -59,7 +59,7 @@ def update_product(id):
     product = Product.get(id)
     if product:
         try:
-            data = json_request(['nom', 'store_id', 'unitats'], False)
+            data = json_request(['nom', 'category_id', 'unitats'], False)
         except Exception as e:
             current_app.logger.debug(e)
             return bad_request(str(e))
