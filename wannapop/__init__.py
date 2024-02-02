@@ -31,6 +31,7 @@ def create_app():
 
     with app.app_context():
         from . import commands, routes_main, routes_auth, routes_admin, routes_products, routes_category, routes_status
+        from .api import api_bp
 
         # Registra els blueprints
         app.register_blueprint(routes_main.main_bp)
@@ -42,6 +43,9 @@ def create_app():
         
         # Registra comandes
         app.cli.add_command(commands.db_cli)
+        
+        #Registra el blueprint de l'API
+        app.register_blueprint(api_bp, url_prefix='/api/v1.0')
 
     app.logger.info("Aplicació iniciada")
 
