@@ -1,5 +1,5 @@
 from . import api_bp
-from ..models import Product, Category, BannedProduct
+from ..models import Product, Category, BannedProduct, Order
 from ..helper_json import json_request, json_response
 from flask import current_app, request
 from .errors import not_found, bad_request
@@ -34,9 +34,8 @@ def create_product():
         current_app.logger.debug("CREATED product: {}".format(product.to_dict()))
         return json_response(product.to_dict(), 201)
 
-
 #Read
-@api_bp.route('/products/{id}', methods=['GET'])
+@api_bp.route('/products/<int:id>', methods=['GET'])
 def get_product(id):
     result = Product.get_with(id, Category, BannedProduct)
     if result:
@@ -54,7 +53,7 @@ def get_product(id):
         return not_found("Product not found")
 
 #Update
-@api_bp.route('/products/{id}', methods=['PUT'])
+@api_bp.route('/products/<int:id>', methods=['PUT'])
 def update_product(id):
     product = Product.get(id)
     if product:
@@ -72,7 +71,7 @@ def update_product(id):
         return not_found("Product not found")
 
 #Delete
-@api_bp.route('/products/{id}', methods=['DELETE'])
+@api_bp.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
     product = Product.get(id)
     if product:
@@ -82,3 +81,11 @@ def delete_product(id):
     else:
         current_app.logger.debug("Product {} not found".format(id))
         return not_found("Product not found")
+   
+#List orders
+@api_bp.route('/products/<int:id>/orders', methods=['GET'])
+def get_product_offers(id):
+    product = Product.get(id)
+    orders = product.get_orders()
+    data = Order.to_dict_collection(orders)
+    return json_response(data)

@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import check_password_hash, generate_password_hash
 from .mixins import BaseMixin, SerializableMixin;
+from datetime import datetime
 
 class User(UserMixin, BaseMixin, SerializableMixin, db.Model):
     __tablename__ = "users"
@@ -70,6 +71,7 @@ class User(UserMixin, BaseMixin, SerializableMixin, db.Model):
         # Si hem arribat fins aquí, l'usuari té permisos
         return True
 
+
 class Product(db.Model, BaseMixin, SerializableMixin,):
     __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
@@ -82,7 +84,10 @@ class Product(db.Model, BaseMixin, SerializableMixin,):
     seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created = db.Column(db.DateTime, server_default=func.now())
     updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
-
+    
+    def get_orders(self):
+        return Order.query.filter_by(product_id=self.id).all()
+    
 class Category(db.Model, BaseMixin, SerializableMixin,):
     __tablename__ = "categories"
     id = db.Column(db.Integer, primary_key=True)
@@ -106,3 +111,16 @@ class BannedProduct(db.Model, BaseMixin, SerializableMixin,):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), primary_key=True)
     reason = db.Column(db.String, nullable=False)
     created = db.Column(db.DateTime, server_default=func.now())
+    
+class Order(db.Model, BaseMixin, SerializableMixin):
+    __tablename__ = "orders"
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
+    buyer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    offer = db.Column(db.Numeric(precision=10, scale=2), nullable=False)
+    created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    product = db.relationship("Product", backref="orders")
+    buyer = db.relationship("User", backref="orders")
+    __table_args__ = (
+        db.UniqueConstraint('product_id', 'buyer_id', name='uc_product_buyer'),
+    )
