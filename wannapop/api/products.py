@@ -1,5 +1,5 @@
 from . import api_bp
-from ..models import Product, Category, BannedProduct, Order
+from ..models import Product, Category, Order, BannedProduct
 from ..helper_json import json_request, json_response
 from flask import current_app, request
 from .errors import not_found, bad_request
@@ -8,12 +8,12 @@ from .errors import not_found, bad_request
 #List
 @api_bp.route('/products', methods=['GET'])
 def get_products():
-    search = request.args.get('search')
-    if search:
+    title = request.args.get('title')
+    if title:
         # Watch SQL at terminal
         Product.db_enable_debug()
         # Filter using query param
-        my_filter = Product.nom.like('%' + search + '%')
+        my_filter = Product.title.like('%' + title + '%')
         products_with_category = Product.db_query_with(Category).filter(my_filter)
     else:
         # No filter
@@ -39,18 +39,21 @@ def create_product():
 def get_product(id):
     result = Product.get_with(id, Category, BannedProduct)
     if result:
-        (product, category, BannedProduct) = result
+        (product, category, banner_product) = result
         # Serialize data
         data = product.to_dict()
         # Add relationships
         data["category"] = category.to_dict()
         del data["category_id"]
-        if (BannedProduct):
-            data["BannedProduct"] = BannedProduct.BannedProduct
+        if banner_product:
+            data["banned_product"] = banner_product.to_dict()
         return json_response(data)
     else:
         current_app.logger.debug("Product {} not found".format(id))
         return not_found("Product not found")
+    
+#List products and filter per title
+
 
 #Update
 @api_bp.route('/products/<int:id>', methods=['PUT'])
