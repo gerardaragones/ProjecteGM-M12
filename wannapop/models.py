@@ -124,3 +124,17 @@ class Order(db.Model, BaseMixin, SerializableMixin):
     __table_args__ = (
         db.UniqueConstraint('product_id', 'buyer_id', name='uc_product_buyer'),
     )
+
+class ConfirmedOrder(db.Model, BaseMixin, SerializableMixin):
+    __tablename__ = "confirmed_orders"
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), primary_key=True)
+    created = db.Column(db.DateTime, server_default=func.now())
+
+    # Relationship
+    order = db.relationship("Order", backref="confirmed_order", uselist=False)
+
+
+class Status(db.Model, BaseMixin, SerializableMixin):
+    __tablename__ = "status"
+    id = db.Column(db.Integer, primary_key=True)
+    estado = db.Column(db.String, nullable=False)

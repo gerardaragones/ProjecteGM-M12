@@ -57,17 +57,17 @@ def get_product(id):
 
 #Update
 @api_bp.route('/products/<int:id>', methods=['PUT'])
-def update_product(id):
+def update_api_product(id):
     product = Product.get(id)
     if product:
         try:
-            data = json_request(['nom', 'category_id', 'unitats'], False)
+            data = json_request(['title', 'description', 'photo', 'price', 'category_id'], False)
         except Exception as e:
             current_app.logger.debug(e)
             return bad_request(str(e))
         else:
             product.update(**data)
-            current_app.logger.debug("UPDATED product: {}".format(product.to_dict()))
+            current_app.logger.debug("UPDATED item: {}".format(product.to_dict()))
             return json_response(product.to_dict())
     else:
         current_app.logger.debug("Product {} not found".format(id))
