@@ -12,7 +12,7 @@ def verify_password(name, password):
     user = User.get_filtered_by(name=name)
     current_app.logger.debug("credentials: " + name)
     current_app.logger.debug("auth user: " + ("None" if user is None else str(user.to_dict())))
-    if user and check_password_hash(user.password, password):
+    if user and user.check_password(password):
         return user
 
 @basic_auth.error_handler

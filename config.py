@@ -9,7 +9,8 @@ class Config:
     SECRET_KEY = environ.get('SECRET_KEY')
     SESSION_COOKIE_NAME = environ.get('SESSION_COOKIE_NAME')
 
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + path.join(basedir, environ.get('SQLITE_FILE_RELATIVE_PATH'))
+    # SQLALCHEMY_DATABASE_URI = "sqlite:///" + path.join(basedir, environ.get('SQLITE_FILE_RELATIVE_PATH'))
+    SQLALCHEMY_DATABASE_URI = "postgresql://2dd01:nHjeQtrXj9N2RohY@37.27.3.70:5432/2dd01_pg"
     SQLALCHEMY_ECHO = environ.get('SQLALCHEMY_ECHO')
 
     MAIL_SUBJECT_PREFIX = environ.get('MAIL_SUBJECT_PREFIX')
