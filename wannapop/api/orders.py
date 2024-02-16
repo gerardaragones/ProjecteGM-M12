@@ -1,8 +1,7 @@
 from . import api_bp
 from .errors import bad_request
-from .. import db_manager as db
 from ..models import Order, ConfirmedOrder, Product, User
-from ..helper_json import json_request, json_response
+from ..helper_json import json_request
 from flask import current_app, jsonify
 
 @api_bp.route('/orders/<int:order_id>/confirmed', methods=['POST'])
@@ -59,11 +58,6 @@ def cancel_confirmed_order(order_id):
                 'success': False
             }), 404
     
-from . import api_bp
-from ..models import Order, User, Product
-from ..helper_json import json_response, json_request, bad_request
-from flask import current_app, jsonify
-
 @api_bp.route('/orders', methods=['POST'])
 def make_offer():
     data = json_request()

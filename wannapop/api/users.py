@@ -1,8 +1,7 @@
 from . import api_bp
 from ..models import User, BlockedUser, Product
-from ..helper_json import json_request, json_response
-from flask import current_app, request
-from .errors import not_found, bad_request
+from ..helper_json import json_response
+from flask import request
 
 @api_bp.route('/users', methods=['GET'])
 def get_users():
