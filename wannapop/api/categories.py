@@ -1,7 +1,7 @@
 from . import api_bp
 from .errors import not_found
 from ..models import Category, Product
-from ..helper_json import json_response
+from .helper_json import json_response, json_request
 from flask import current_app
 
 # List

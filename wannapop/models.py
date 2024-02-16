@@ -4,8 +4,9 @@ from sqlalchemy.sql import func
 from sqlalchemy.ext.hybrid import hybrid_property
 from werkzeug.security import check_password_hash, generate_password_hash
 from .mixins import BaseMixin, SerializableMixin;
-from datetime import datetime
+from datetime import datetime, timedelta ,timezone
 
+import secrets
 class User(UserMixin, BaseMixin, SerializableMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -17,6 +18,8 @@ class User(UserMixin, BaseMixin, SerializableMixin, db.Model):
     email_token = db.Column(db.String, nullable=True, server_default=None)
     created = db.Column(db.DateTime, server_default=func.now())
     updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    token = db.Column(db.String)
+    token_expiration = db.Column(db.DateTime, server_default=func.now()+ timedelta(days=90))
 
     def get_id(self):
         return self.email
@@ -70,6 +73,9 @@ class User(UserMixin, BaseMixin, SerializableMixin, db.Model):
         
         # Si hem arribat fins aquí, l'usuari té permisos
         return True
+    
+    token = db.Column(db.String)
+    token_expiration = db.Column(db.DateTime)
 
 
 class Product(db.Model, BaseMixin, SerializableMixin,):
@@ -84,6 +90,29 @@ class Product(db.Model, BaseMixin, SerializableMixin,):
     seller_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created = db.Column(db.DateTime, server_default=func.now())
     updated = db.Column(db.DateTime, server_default=func.now(), onupdate=func.now())
+    
+    def get_token(self, expires_in=3600):
+        now = datetime.now(timezone.utc)
+        if self.token and self.token_expiration.replace(
+                tzinfo=timezone.utc) > now + timedelta(seconds=60):
+            return self.token
+        self.token = secrets.token_hex(16)
+        self.token_expiration = now + timedelta(seconds=expires_in)
+        self.save()
+        return self.token
+
+    def revoke_token(self):
+        self.token_expiration = datetime.now(timezone.utc) - timedelta(
+            seconds=1)
+        self.save()
+
+    @staticmethod
+    def check_token(token):
+        user = User.get_filtered_by(token=token)
+        if user is None or user.token_expiration.replace(
+                tzinfo=timezone.utc) < datetime.now(timezone.utc):
+            return None
+        return user
     
     def get_orders(self):
         return Order.query.filter_by(product_id=self.id).all()

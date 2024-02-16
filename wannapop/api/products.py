@@ -1,8 +1,9 @@
 from . import api_bp
 from ..models import Product, Category, Order, BannedProduct
-from ..helper_json import json_request, json_response
+from .helper_json import json_request, json_response
 from flask import current_app, request
-from .errors import not_found, bad_request
+from .errors import not_found, bad_request, forbidden_access
+from .helper_auth import basic_auth, token_auth
 
 
 #List
@@ -57,21 +58,16 @@ def get_product(id):
 
 #Update
 @api_bp.route('/products/<int:id>', methods=['PUT'])
+@token_auth.login_required
 def update_api_product(id):
     product = Product.get(id)
-    if product:
-        try:
-            data = json_request(['title', 'description', 'photo', 'price', 'category_id'], False)
-        except Exception as e:
-            current_app.logger.debug(e)
-            return bad_request(str(e))
-        else:
-            product.update(**data)
-            current_app.logger.debug("UPDATED item: {}".format(product.to_dict()))
-            return json_response(product.to_dict())
-    else:
-        current_app.logger.debug("Product {} not found".format(id))
-        return not_found("Product not found")
+    if basic_auth.current_user().id == product.seller_id :
+        data = json_request(['title','description', 'photo', 'price'],False)
+        current_app.logger.debug(data)
+        product.update(**data)
+        return json_response(product.to_dict())
+    else: 
+        return forbidden_access("You are not the owner of this product")
 
 #Delete
 @api_bp.route('/products/<int:id>', methods=['DELETE'])

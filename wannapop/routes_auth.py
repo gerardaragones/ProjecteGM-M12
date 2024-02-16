@@ -6,6 +6,7 @@ from .helper_role import notify_identity_changed, Role
 from .models import User
 import secrets
 from markupsafe import Markup
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Blueprint
 auth_bp = Blueprint("auth_bp", __name__)

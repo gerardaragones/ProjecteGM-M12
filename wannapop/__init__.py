@@ -5,6 +5,7 @@ from flask_principal import Principal
 from werkzeug.local import LocalProxy
 from flask_debugtoolbar import DebugToolbarExtension
 from .helper_mail import MailManager
+from flask_httpauth import HTTPBasicAuth
 
 # https://stackoverflow.com/a/31764294
 logger = LocalProxy(lambda: current_app.logger)
