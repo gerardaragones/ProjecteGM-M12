@@ -135,6 +135,6 @@ class ConfirmedOrder(db.Model, BaseMixin, SerializableMixin):
 
 
 class Status(db.Model, BaseMixin, SerializableMixin):
-    __tablename__ = "status"
+    __tablename__ = "statuses"
     id = db.Column(db.Integer, primary_key=True)
     estado = db.Column(db.String, nullable=False)

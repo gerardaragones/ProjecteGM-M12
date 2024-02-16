@@ -8,10 +8,9 @@ def get_users():
     name = request.args.get('name')
     if name:
         User.db_enable_debug()
-        my_filter = User.name.ilike('%' + name + '%')
-        users = User.db_query_with(BlockedUser).filter(my_filter)
+        users = User.name.like('%' + name + '%')
     else:
-        users = User.get_all_with(BlockedUser)
+        users = []
     data = User.to_dict_collection(users)
     return json_response(data)
 
