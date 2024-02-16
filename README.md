@@ -12,7 +12,7 @@ Crea l'entorn:
 
 Activa'l:
 
-    source .venv/bin/activate
+    source .venv/bin/activate / source .venv/Scripts/activate
 
 Instal·la el requisits:
 
