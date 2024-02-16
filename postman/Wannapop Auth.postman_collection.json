@@ -1,0 +1,103 @@
+{
+	"info": {
+		"_postman_id": "6605e04e-07eb-40a5-9011-9a4b6bd0f540",
+		"name": "Wannapop Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32597426",
+		"_collection_link": "https://gerardmarc.postman.co/workspace/Workspace-M12~9b4cde4f-a97c-49a9-ad5b-a33eccefe88b/collection/32597426-6605e04e-07eb-40a5-9011-9a4b6bd0f540?action=share&source=collection_link&creator=32597426"
+	},
+	"item": [
+		{
+			"name": "1",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "Elia Rodríguez",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "patata",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{API_ENDPOINT}}/tokens",
+					"host": [
+						"{{API_ENDPOINT}}"
+					],
+					"path": [
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\" : \"RauwAlejandro\",\n    \"photo\" : \"a59ec155-ddbc-4c82-bba5-64b3f950576e-images.jpeg\",\n    \"price\" : \"1\",\n    \"category\": {\n        \"id\": 1,\n        \"name\": \"Electrònica\",\n        \"slug\": \"electronica\"\n    }\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ENDPOINT}}/orders/1/confirmed",
+					"host": [
+						"{{API_ENDPOINT}}"
+					],
+					"path": [
+						"orders",
+						"1",
+						"confirmed"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
